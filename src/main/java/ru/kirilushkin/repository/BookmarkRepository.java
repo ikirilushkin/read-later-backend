@@ -80,8 +80,8 @@ public class BookmarkRepository {
         }
         sb.append(";");
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("unread", unread);
-        params.addValue("read", read);
+        params.addValue("unread", false);
+        params.addValue("read", true);
         params.addValue("tag", "%" + tag + "%");
         params.addValue("link", "%" + link + "%");
         return jdbcTemplate.query(
@@ -93,12 +93,7 @@ public class BookmarkRepository {
 
     private List<String> createSearchConditions(Boolean unread, Boolean read, String tag, String link) {
         List<String> conditions = new ArrayList<>();
-        if (unread) {
-            conditions.add("read = :unread");
-        }
-        if (read) {
-            conditions.add("read = :read");
-        }
+        getReadConditions(conditions, unread, read);
         if (tag != null) {
             conditions.add("tags LIKE :tag");
         }
@@ -106,5 +101,21 @@ public class BookmarkRepository {
             conditions.add("title LIKE :link OR url LIKE :link");
         }
         return conditions;
+    }
+
+    private void getReadConditions(List<String> conditions, Boolean unread, Boolean read) {
+        if (unread == true || read == true) {
+            StringBuilder sb = new StringBuilder("(");
+            if (unread) {
+                sb.append("read = :unread ");
+            } if (read) {
+                if (unread) {
+                    sb.append("OR ");
+                }
+                sb.append("read = :read");
+            }
+            sb.append(")");
+            conditions.add(sb.toString());
+        }
     }
 }
