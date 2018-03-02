@@ -1,5 +1,6 @@
 package ru.kirilushkin.repository;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -117,5 +118,18 @@ public class BookmarkRepository {
             sb.append(")");
             conditions.add(sb.toString());
         }
+    }
+
+    public Bookmark getByUrl(String url) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "SELECT id, title, url, tags, read FROM bookmarks WHERE url = :url",
+                    Map.of("url", url),
+                    bookmarkMapper
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+
     }
 }

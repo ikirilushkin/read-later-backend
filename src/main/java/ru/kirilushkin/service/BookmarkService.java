@@ -1,7 +1,10 @@
 package ru.kirilushkin.service;
 
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 import ru.kirilushkin.domain.Bookmark;
+import ru.kirilushkin.exception.RestValidationException;
 import ru.kirilushkin.repository.BookmarkRepository;
 
 import java.util.List;
@@ -11,12 +14,23 @@ public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
 
-    public BookmarkService(BookmarkRepository bookmarkRepository) {
+    private final MessageSource messageSource;
+
+    public BookmarkService(BookmarkRepository bookmarkRepository, MessageSource messageSource) {
         this.bookmarkRepository = bookmarkRepository;
+        this.messageSource = messageSource;
     }
 
-    public void add(Bookmark bookmark) {
-        bookmarkRepository.add(bookmark);
+    public void add(Bookmark bookmark, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new RestValidationException(messageSource.getMessage(
+                    bindingResult.getFieldError().getDefaultMessage(),
+                    new Object[]{},
+                    null
+            ));
+        } else {
+            bookmarkRepository.add(bookmark);
+        }
     }
 
     public void deleteById(int id) {
@@ -33,5 +47,9 @@ public class BookmarkService {
 
     public List<Bookmark> search(Boolean unread, Boolean read, String tag, String link) {
         return bookmarkRepository.search(unread, read, tag, link);
+    }
+
+    public Bookmark getByUrl(String url) {
+        return bookmarkRepository.getByUrl(url);
     }
 }

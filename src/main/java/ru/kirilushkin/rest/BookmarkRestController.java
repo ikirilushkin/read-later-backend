@@ -1,10 +1,12 @@
 package ru.kirilushkin.rest;
 
 import io.swagger.annotations.ApiOperation;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.kirilushkin.domain.Bookmark;
 import ru.kirilushkin.service.BookmarkService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -26,8 +28,8 @@ public class BookmarkRestController {
 
     @PostMapping
     @ApiOperation("Add bookmark")
-    public void add(@RequestBody Bookmark bookmark) {
-        bookmarkService.add(bookmark);
+    public void add(@RequestBody @Valid Bookmark bookmark, BindingResult bindingResult) {
+        bookmarkService.add(bookmark, bindingResult);
     }
 
     @DeleteMapping("/{id}")
