@@ -105,12 +105,12 @@ public class BookmarkRepository {
     }
 
     private void getReadConditions(List<String> conditions, Boolean unread, Boolean read) {
-        if (unread == true || read == true) {
+        if (Boolean.TRUE.equals(unread) || Boolean.TRUE.equals(read)) {
             StringBuilder sb = new StringBuilder("(");
-            if (unread) {
+            if (Boolean.TRUE.equals(unread)) {
                 sb.append("read = :unread ");
-            } if (read) {
-                if (unread) {
+            } if (Boolean.TRUE.equals(read)) {
+                if (Boolean.TRUE.equals(unread)) {
                     sb.append("OR ");
                 }
                 sb.append("read = :read");
