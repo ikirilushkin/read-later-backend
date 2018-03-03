@@ -23,7 +23,7 @@ public class Bookmark {
 
     @NotNull(message = "validation.error.bookmark.url.size")
     @Size(min = 1, message = "validation.error.bookmark.url.size")
-    @UniqueBookmarkUrl
+    //@UniqueBookmarkUrl
     private String url;
 
     private List<String> tags = new ArrayList<>();

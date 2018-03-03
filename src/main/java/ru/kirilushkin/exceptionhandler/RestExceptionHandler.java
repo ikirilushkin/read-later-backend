@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.kirilushkin.exception.RestValidationException;
 import ru.kirilushkin.response.RestErrorResponse;
 import ru.kirilushkin.response.ValidationErrorResponse;
 
@@ -35,17 +36,33 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(response, status);
     }
 
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException e) {
-        BindingResult bindingResult = e.getBindingResult();
-        ValidationErrorResponse response = new ValidationErrorResponse(
-                bindingResult.getFieldError().getField(),
-                messageSource.getMessage(
-                        bindingResult.getFieldError().getDefaultMessage(),
-                        new Object[]{},
-                        null
-                ),
-                bindingResult.getFieldError().getDefaultMessage());
+    @ExceptionHandler(value = { MethodArgumentNotValidException.class, RestValidationException.class })
+    public ResponseEntity<ValidationErrorResponse> handleValidation(Exception e) {
+        ValidationErrorResponse response = null;
+        if (e instanceof MethodArgumentNotValidException) {
+            MethodArgumentNotValidException exception = (MethodArgumentNotValidException) e;
+            BindingResult bindingResult = exception.getBindingResult();
+            response = new ValidationErrorResponse(
+                    bindingResult.getFieldError().getField(),
+                    messageSource.getMessage(
+                            bindingResult.getFieldError().getDefaultMessage(),
+                            new Object[]{},
+                            null
+                    ),
+                    bindingResult.getFieldError().getDefaultMessage());
+        } else if (e instanceof RestValidationException) {
+            RestValidationException exception = (RestValidationException) e;
+            response = new ValidationErrorResponse(
+                    exception.getField(),
+                    messageSource.getMessage(
+                            exception.getMessage(),
+                            new Object[]{},
+                            null
+                    ),
+                    exception.getMessage()
+            );
+        }
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

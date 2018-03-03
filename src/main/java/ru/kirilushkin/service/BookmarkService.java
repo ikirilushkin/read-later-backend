@@ -1,7 +1,9 @@
 package ru.kirilushkin.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kirilushkin.domain.Bookmark;
+import ru.kirilushkin.exception.RestValidationException;
 import ru.kirilushkin.repository.BookmarkRepository;
 
 import java.util.List;
@@ -15,8 +17,13 @@ public class BookmarkService {
         this.bookmarkRepository = bookmarkRepository;
     }
 
+    @Transactional
     public void add(Bookmark bookmark) {
-        bookmarkRepository.add(bookmark);
+        if (getByUrl(bookmark.getUrl()) == null) {
+            bookmarkRepository.add(bookmark);
+        } else {
+            throw new RestValidationException("validation.error.bookmark.url.unique", "url");
+        }
     }
 
     public void deleteById(int id) {
