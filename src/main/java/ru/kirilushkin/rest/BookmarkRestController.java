@@ -28,8 +28,8 @@ public class BookmarkRestController {
 
     @PostMapping
     @ApiOperation("Add bookmark")
-    public void add(@RequestBody @Valid Bookmark bookmark, BindingResult bindingResult) {
-        bookmarkService.add(bookmark, bindingResult);
+    public void add(@RequestBody @Valid Bookmark bookmark) {
+        bookmarkService.add(bookmark);
     }
 
     @DeleteMapping("/{id}")
