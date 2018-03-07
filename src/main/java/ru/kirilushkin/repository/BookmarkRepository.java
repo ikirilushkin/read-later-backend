@@ -8,17 +8,20 @@ import org.springframework.stereotype.Repository;
 import ru.kirilushkin.domain.Bookmark;
 
 import javax.sql.DataSource;
+import java.sql.Array;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 public class BookmarkRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    private final DataSource dataSource;
 
     private static final RowMapper<Bookmark> bookmarkMapper = (rs, i) -> {
         Object[] arr = (Object[]) rs.getArray("tags").getArray();
@@ -33,15 +36,23 @@ public class BookmarkRepository {
         );
     };
 
-    public BookmarkRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    public BookmarkRepository(NamedParameterJdbcTemplate jdbcTemplate, DataSource dataSource) {
         this.jdbcTemplate = jdbcTemplate;
+        this.dataSource = dataSource;
     }
 
     public void add(Bookmark bookmark) {
+        Array tags = null;
+        try {
+            Connection connection = dataSource.getConnection();
+            tags = connection.createArrayOf("text", bookmark.getTags().toArray());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("title", bookmark.getTitle());
         params.addValue("url", bookmark.getUrl());
-        params.addValue("tags", bookmark.getTags().toArray());
+        params.addValue("tags", tags);
         jdbcTemplate.update(
                 "INSERT INTO bookmarks (title, url, tags) VALUES (:title, :url, :tags)",
                 params
@@ -83,7 +94,7 @@ public class BookmarkRepository {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("unread", false);
         params.addValue("read", true);
-        params.addValue("tag", "%" + tag + "%");
+        params.addValue("tag", tag);
         params.addValue("link", "%" + link + "%");
         return jdbcTemplate.query(
                 sb.toString(),
@@ -96,7 +107,7 @@ public class BookmarkRepository {
         List<String> conditions = new ArrayList<>();
         getReadConditions(conditions, unread, read);
         if (tag != null) {
-            conditions.add("tags LIKE :tag");
+            conditions.add(":tag = ANY(tags)");
         }
         if (link != null) {
             conditions.add("title LIKE :link OR url LIKE :link");
