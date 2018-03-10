@@ -1,7 +1,6 @@
 package ru.kirilushkin.rest;
 
 import io.swagger.annotations.ApiOperation;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.kirilushkin.domain.Bookmark;
 import ru.kirilushkin.service.BookmarkService;
@@ -38,10 +37,16 @@ public class BookmarkRestController {
         bookmarkService.deleteById(id);
     }
 
-    @PutMapping("/{id}")
-    @ApiOperation("Update bookmark read status")
-    public void updateRead(@PathVariable int id, @RequestBody Bookmark bookmark) {
-        bookmarkService.updateRead(id, bookmark.isRead());
+    @PutMapping("/{id}/read")
+    @ApiOperation("Update bookmark read status to true")
+    public void setRead(@PathVariable int id) {
+        bookmarkService.updateReadStatus(id, true);
+    }
+
+    @DeleteMapping("/{id}/read")
+    @ApiOperation("Update bookmark read status to false")
+    public void setUnread(@PathVariable int id) {
+        bookmarkService.updateReadStatus(id, false);
     }
 
     @GetMapping("/search")
