@@ -39,7 +39,6 @@ public class BookmarkRestControllerTest {
 
     @Test
     @DirtiesContext
-    @Transactional
     public void addBookmark() {
         List<Bookmark> bookmarks = restTemplate.exchange(
                 "/api/bookmarks?read=false",
@@ -104,25 +103,25 @@ public class BookmarkRestControllerTest {
         assertEquals("validation.error.bookmark.url.size", response.get("code"));
     }
 
-//    @Test
-//    @DirtiesContext
-//    @Sql("classpath:sql/insert-bookmark.sql")
-//    public void shouldErrorOnUrlUnique() {
-//        Bookmark bookmark = Bookmark.builder()
-//                .title("bookmark1")
-//                .url("bookmark1")
-//                .tags(List.of("tag1", "tag2"))
-//                .build();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//        HttpEntity<Bookmark> entity = new HttpEntity<>(bookmark, headers);
-//        ResponseEntity<Object> responseEntity = restTemplate.exchange("/api/bookmarks", HttpMethod.POST, entity, Object.class);
-//        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-//        LinkedHashMap<String, String> response = (LinkedHashMap<String, String>) responseEntity.getBody();
-//        assertEquals("url", response.get("field"));
-//        assertEquals("validation.error.bookmark.url.unique", response.get("code"));
-//    }
+    @Test
+    @DirtiesContext
+    @Sql("classpath:sql/insert-bookmark.sql")
+    public void shouldErrorOnUrlUnique() {
+        Bookmark bookmark = Bookmark.builder()
+                .title("bookmark1")
+                .url("bookmark1")
+                .tags(List.of("tag1", "tag2"))
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Bookmark> entity = new HttpEntity<>(bookmark, headers);
+        ResponseEntity<Object> responseEntity = restTemplate.exchange("/api/bookmarks", HttpMethod.POST, entity, Object.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        LinkedHashMap<String, String> response = (LinkedHashMap<String, String>) responseEntity.getBody();
+        assertEquals("url", response.get("field"));
+        assertEquals("validation.error.bookmark.url.unique", response.get("code"));
+    }
 
     @Test
     public void search() {
@@ -160,7 +159,6 @@ public class BookmarkRestControllerTest {
 
     @Test
     @DirtiesContext
-    @Transactional
     public void setUnreadStatus() {
         List<Bookmark> bookmarks = restTemplate.exchange(
                 "/api/bookmarks?read=true",
@@ -183,7 +181,6 @@ public class BookmarkRestControllerTest {
 
     @Test
     @DirtiesContext
-    @Transactional
     public void deleteBookmark() {
         List<Bookmark> bookmarks = restTemplate.exchange(
                 "/api/bookmarks?read=true",
