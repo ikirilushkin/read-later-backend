@@ -1,4 +1,4 @@
-package ru.kirilushkin.e2e;
+package ru.kirilushkin.integration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
